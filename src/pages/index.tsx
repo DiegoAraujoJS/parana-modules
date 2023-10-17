@@ -9,9 +9,14 @@ export default function Home() {
   const resetSelected = useCallback(() => setSelected({}), [])
 
   const [isMouseDown, setIsMouseDown] = useState(false);
+  const [deleteMode, setDeleteMode] = useState(false)
 
   const handleMouseDown = (row: number, col: number) => {
-    console.log("mouse down", row, col)
+    if (selected[`${row}_${col}`]) {
+      setDeleteMode(true)
+    } else {
+      setDeleteMode(false)
+    }
     setSelected({...selected, [`${row}_${col}`]: !selected[`${row}_${col}`]})
     setIsMouseDown(true);
   };
@@ -20,15 +25,13 @@ export default function Home() {
     setIsMouseDown(false);
   };
 
-  const handleMouseMove = (row: number, col: number) => {
-    console.log("mouse move", row, col, isMouseDown)
-    if (isMouseDown && !selected[`${row}_${col}`]) {
-      setSelected({...selected, [`${row}_${col}`]: true})
+  const handleMouseEnter = (row: number, col: number) => {
+    if (isMouseDown) {
+      setSelected({...selected, [`${row}_${col}`]: deleteMode ? false : true})
     }
   };
 
   const canvasBoxes = useMemo(() => rows.map((row) => {
-    console.log("re render boxes")
     return columns.map((col) => {
       return <div key={`${row}_${col}`} style={{
         gridRowStart: row,
@@ -37,7 +40,7 @@ export default function Home() {
       }} 
         onMouseDown={() => handleMouseDown(row, col)}
         onMouseUp={handleMouseUp}
-        onMouseMove={() => handleMouseMove(row, col)}
+        onMouseEnter={() => handleMouseEnter(row, col)}
       ></div>
     })
   }).flat(), [selected, isMouseDown])
