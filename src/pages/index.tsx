@@ -1,5 +1,5 @@
 import Head from "next/head";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 const rows = [2,3,4,5,6,7]
 const columns = [2,3,4,5,6,7]
@@ -7,6 +7,41 @@ const columns = [2,3,4,5,6,7]
 export default function Home() {
   const [selected, setSelected] = useState<Record<string, boolean>>({})
   const resetSelected = useCallback(() => setSelected({}), [])
+
+  const [isMouseDown, setIsMouseDown] = useState(false);
+
+  const handleMouseDown = (row: number, col: number) => {
+    console.log("mouse down", row, col)
+    setSelected({...selected, [`${row}_${col}`]: !selected[`${row}_${col}`]})
+    setIsMouseDown(true);
+  };
+
+  const handleMouseUp = () => {
+    setIsMouseDown(false);
+  };
+
+  const handleMouseMove = (row: number, col: number) => {
+    console.log("mouse move", row, col, isMouseDown)
+    if (isMouseDown && !selected[`${row}_${col}`]) {
+      setSelected({...selected, [`${row}_${col}`]: true})
+    }
+  };
+
+  const canvasBoxes = useMemo(() => rows.map((row) => {
+    console.log("re render boxes")
+    return columns.map((col) => {
+      return <div key={`${row}_${col}`} style={{
+        gridRowStart: row,
+        gridColumnStart: col,
+        border: `${selected[`${row}_${col}`] ? "4px solid black" : "0.25px solid black"}`
+      }} 
+        onMouseDown={() => handleMouseDown(row, col)}
+        onMouseUp={handleMouseUp}
+        onMouseMove={() => handleMouseMove(row, col)}
+      ></div>
+    })
+  }).flat(), [selected, isMouseDown])
+
   return (
     <>
       <Head>
@@ -21,15 +56,7 @@ export default function Home() {
             <button className="btn btn-primary" onClick={resetSelected}>Reset</button>
           </div>
 
-          {rows.map((row) => {
-            return columns.map((col) => {
-              return <div key={`${row}_${col}`} style={{
-                gridRowStart: row,
-                gridColumnStart: col,
-                border: `${selected[`${row}_${col}`] ? "4px solid black" : "0.25px solid black"}`
-              }} onClick={() => setSelected({...selected, [`${row}_${col}`]: !selected[`${row}_${col}`]})}></div>
-            })
-          }).flat()}
+          {canvasBoxes}
 
         </div>
       </main>
