@@ -1,11 +1,12 @@
 import Head from "next/head";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
-const columns = [1,2,3,4,5,6,7,8]
-const rows = [1,2,3,4,5,6,7,8]
+const rows = [2,3,4,5,6,7]
+const columns = [2,3,4,5,6,7]
 
 export default function Home() {
   const [selected, setSelected] = useState<{[k: string]: boolean}>({})
+  const resetSelected = useCallback(() => setSelected({}), [])
   return (
     <>
       <Head>
@@ -14,17 +15,20 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="min-h-screen">
-        <div className={`min-h-screen bg-green-50 grid grid-cols-8 grid-rows-[8]`}>
+        <div className={`min-h-screen modules-canvas`}>
+
+          <div className="row-start-1 col-start-7 flex items-center justify-center">
+            <button className="btn btn-primary" onClick={resetSelected}>Reset</button>
+          </div>
 
           {rows.map((row, i) => {
-            console.log(row)
-            return columns.map((col, j) => <div className={`${selected[`${row}_${col}`] ? "bg-secondary" : ""}`} key={`${j}_${i}`} style={{
-            gridColumnStart: col,
-            gridColumnEnd: col,
-            gridRowStart: row,
-            gridRowEnd: row,
-            ...(row === 1 || col === 1 || row === 8 || col === 8 ? {} : {border: "1px solid black"})
-          }} onClick={!(row === 1 || col === 1 || row === 8 || col === 8) ? () => setSelected({...selected, [`${row}_${col}`]: !selected[`${row}_${col}`]}) : () => {}}></div>)
+            return columns.map((col, j) => {
+              return <div key={`${row}_${col}`} style={{
+                gridRowStart: row,
+                gridColumnStart: col,
+                border: `${selected[`${row}_${col}`] ? "4px solid black" : "0.25px solid black"}`
+              }} onClick={() => setSelected({...selected, [`${row}_${col}`]: !selected[`${row}_${col}`]})}></div>
+            })
           }).flat()}
 
         </div>
