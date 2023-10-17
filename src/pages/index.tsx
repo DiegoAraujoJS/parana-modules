@@ -1,10 +1,20 @@
 import Head from "next/head";
+import { useState } from "react";
 
 const columns = [1,2,3,4,5,6,7,8]
 const rows = [1,2,3,4,5,6,7,8]
 
 export default function Home() {
-  const boxes = rows.map((_, i) => columns.map((_, j) => <div key={`${j}_${i}`} className={`col-start-${j + 1} col-end-${j + 1} row-start-${i + 1} row-end-${i + 1}`}></div>)).flat()
+  const [selected, setSelected] = useState<{[k: string]: boolean}>({})
+  const boxes = rows.map((row, i) => columns.map((col, j) => <div key={`${j}_${i}`} style={{
+    gridColumnStart: col,
+    gridColumnEnd: col,
+    gridRowStart: row,
+    gridRowEnd: row,
+    background: selected[`${row}_${col}`] ? "grey" : "",
+    ...(row === 1 || col === 1 || row === 8 || col === 8 ? {} : {border: "1px solid black"})
+  }} onClick={!(row === 1 || col === 1 || row === 8 || col === 8) ? () => setSelected({...selected, [`${row}_${col}`]: !selected[`${row}_${col}`]}) : () => {}}></div>)).flat()
+  console.log(boxes.length)
   return (
     <>
       <Head>
@@ -13,7 +23,9 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="min-h-screen">
-        <div className="min-h-screen bg-green-50 modules-canvas">{boxes}</div>
+        <div className={`min-h-screen bg-green-50 grid grid-cols-8 grid-rows-[8]`}>
+          {boxes}
+        </div>
       </main>
     </>
   );
