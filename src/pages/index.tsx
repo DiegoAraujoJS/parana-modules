@@ -5,7 +5,7 @@ const rows = [2,3,4,5,6,7]
 const columns = [2,3,4,5,6,7]
 
 export default function Home() {
-  const [selected, setSelected] = useState<{[k: string]: boolean}>({})
+  const [selected, setSelected] = useState<Record<string, boolean>>({})
   const resetSelected = useCallback(() => setSelected({}), [])
   return (
     <>
@@ -21,8 +21,8 @@ export default function Home() {
             <button className="btn btn-primary" onClick={resetSelected}>Reset</button>
           </div>
 
-          {rows.map((row, i) => {
-            return columns.map((col, j) => {
+          {rows.map((row) => {
+            return columns.map((col) => {
               return <div key={`${row}_${col}`} style={{
                 gridRowStart: row,
                 gridColumnStart: col,
