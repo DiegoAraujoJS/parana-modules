@@ -11,6 +11,18 @@ export default function Home() {
   const [isMouseDown, setIsMouseDown] = useState(false);
   const [deleteMode, setDeleteMode] = useState(false)
 
+  useEffect(() => {
+    const handleMouseUp = () => {
+      setIsMouseDown(false)
+    }
+
+    window.addEventListener('mouseup', handleMouseUp)
+
+    return () => {
+      window.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [])
+
   const handleMouseDown = (row: number, col: number) => {
     if (selected[`${row}_${col}`]) {
       setDeleteMode(true)
@@ -19,10 +31,6 @@ export default function Home() {
     }
     setSelected({...selected, [`${row}_${col}`]: !selected[`${row}_${col}`]})
     setIsMouseDown(true);
-  };
-
-  const handleMouseUp = () => {
-    setIsMouseDown(false);
   };
 
   const handleMouseEnter = (row: number, col: number) => {
@@ -39,7 +47,6 @@ export default function Home() {
         border: `${selected[`${row}_${col}`] ? "4px solid black" : "0.25px solid black"}`
       }} 
         onMouseDown={() => handleMouseDown(row, col)}
-        onMouseUp={handleMouseUp}
         onMouseEnter={() => handleMouseEnter(row, col)}
       ></div>
     })
