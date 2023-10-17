@@ -1,3 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+.modules-canvas {
+  display: grid;
+  grid-template-rows: repeat(1fr, 8);
+  grid-template-columns: repeat(1fr, 8);
+}
+
+.modules-canvas div {
+  border: 1px solid black;
+}
