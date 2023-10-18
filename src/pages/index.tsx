@@ -22,28 +22,14 @@ const lineIsVertical = (line: Line) => line[0] === line[2]
 
 const isIdentical = (line1: Line, line2: Line) => (line1[0] === line2[0] && line1[1] === line2[1] && line1[2] === line2[2] && line1[3] === line2[3]) || (line1[2] === line2[0] && line1[3] === line2[1] && line1[0] === line2[2] && line1[1] === line2[3])
 
-const renderLine = (line: Line): JSX.Element => {
-  const [a, b, c, d] = line
-  if (lineIsVertical(line)) {
-    return <div onMouseEnter={console.log} className="bg-primary hover:bg-secondary" key={`${a}_${b}_${c}_${d}`} style={{
-      gridColumnStart: a + 1,
-      gridRowStart: Math.max(b, d),
-      width: "8px",
-    }}></div>
-  } else {
-    return <div className="bg-primary hover:bg-secondary" key={`${a}_${b}_${c}_${d}`} style={{
-      gridColumnStart: Math.max(a, c),
-      gridRowStart: b + 1,
-      height: "8px",
-    }}></div>
-  }
-}
 
 const generateInstructions = (mouseDownState: MouseDownState) => {
   if (mouseDownState < 3) return "1. Presioná y pasá el cursor por las cajas"
   if (mouseDownState === 3) return "2. Tocá las columnas para generar espacios"
   return ""
 }
+
+const deleteLine = (lines: Line[], lineToDelete: Line) => lines.filter(line => !isIdentical(line, lineToDelete))
 
 export default function Home() {
   const [selected, setSelected] = useState<Line[]>([])
@@ -71,8 +57,23 @@ export default function Home() {
     setIsMouseDown(1)
   }
 
+  const renderLine = (line: Line): JSX.Element => {
+    const [a, b, c, d] = line
+    if (lineIsVertical(line)) {
+      return <div onClick={() => setSelected(deleteLine(selected, line))} className="bg-primary hover:bg-secondary" key={`${a}_${b}_${c}_${d}`} style={{
+        gridColumnStart: a + 1,
+        gridRowStart: Math.max(b, d),
+        width: "8px",
+      }}></div>
+    } else {
+      return <div onClick={() => setSelected(deleteLine(selected, line))} className="bg-primary hover:bg-secondary" key={`${a}_${b}_${c}_${d}`} style={{
+        gridColumnStart: Math.max(a, c),
+        gridRowStart: b + 1,
+        height: "8px",
+      }}></div>
+    }
+  }
   const handleMouseEnter = (row: number, col: number) => {
-    console.log("mouse enter", isMouseDown)
     if (isMouseDown === 2) {
       const lines = generateLinesForBox(row, col)
       const newLines = lines.filter(line => !selected.some(existingLine => isIdentical(line, existingLine)))
@@ -92,7 +93,6 @@ export default function Home() {
 
   useEffect(() => {
     const handleMouseUp = () => {
-      console.log("mouse up")
       if (isMouseDown === 2) setIsMouseDown(3)
     }
 
