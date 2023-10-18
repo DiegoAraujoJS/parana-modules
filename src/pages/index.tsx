@@ -1,5 +1,6 @@
 import Head from "next/head";
 import { HTMLAttributes, useCallback, useEffect, useMemo, useState } from "react";
+import Swal from "sweetalert2";
 
 type Line = [number, number, number, number]
 type MouseDownState = 1 | 2 | 3
@@ -92,7 +93,7 @@ export default function Home() {
   useEffect(() => {
     const handleMouseUp = () => {
       console.log("mouse up")
-      setIsMouseDown(3)
+      if (isMouseDown === 2) setIsMouseDown(3)
     }
 
     window.addEventListener('mouseup', handleMouseUp)
@@ -100,6 +101,10 @@ export default function Home() {
     return () => {
       window.removeEventListener('mouseup', handleMouseUp)
     }
+  }, [isMouseDown])
+
+  useEffect(() => {
+    Swal.fire("", "<div style=\"font-size: 20px;\">Seguí las pasos indicados arriba para usar el maquetador. <br/> <br/>Si querés volver a empezar el proceso, tocá en cualquier momento el botón de <b>Reset</b>.</div>", "info")
   }, [])
 
   return (
@@ -110,13 +115,20 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main id="modules" className="min-h-screen">
+
         <div className={`min-h-screen modules-canvas`}>
           <div className="row-start-1 col-start-8 flex items-center justify-center">
             <button className="btn btn-primary" onClick={resetSelected}>Reset</button>
           </div>
-          <div className="text-primary row-start-1 col-start-2 col-end-5 flex items-center text-lg">{generateInstructions(isMouseDown)}</div>
+          <div className="row-start-1 col-start-2 col-end-6 flex items-center text-2xl">
+            <div className="alert alert-info">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <span>{generateInstructions(isMouseDown)}</span>
+            </div>
+          </div>
           {selected.map(renderLine)}
           {canvasBoxes}
+
         </div>
       </main>
     </>
