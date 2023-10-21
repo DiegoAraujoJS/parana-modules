@@ -24,8 +24,11 @@ const isIdentical = (line1: Line, line2: Line) => (line1[0] === line2[0] && line
 
 const isBoxMate = (pairLineA: Line, pairLineB: Line, swaped = false): boolean => {
   if (isIdentical(pairLineA, pairLineB)) return false
+
+  /* eslint-disable @typescript-eslint/no-unused-vars */
   const [a1, b1, c1, d1] = pairLineA
   const [a2, b2, c2, d2] = pairLineB
+  /* eslint-enable @typescript-eslint/no-unused-vars */
   return (a1 === a2 && b1 === b2) /* Therefore  */
     && (b1 + 1 === d1) /* Then */
     && (a2 + 1 === c2) 
@@ -50,21 +53,6 @@ export default function Home() {
 
   const [isMouseDown, setIsMouseDown] = useState<MouseDownState>(1);
 
-  const handleMouseDown = (row: number, col: number) => {
-    const lines = generateLinesForBox(row, col)
-    // const linesAreSelected = lines.every(line => selected.some(l => isIdentical(l, line)))
-    // if (linesAreSelected) {
-    // const newLines = deleteLines(selected, lines) // Remains an open question: How to define the lines to delete?
-    // It will have to do with the requirements of valid modules: the set S of lines to delete will be such that the selected lines - S is a valid module.
-    // For now, we will disable delete mode: you can only delete individual lines.
-    // setSelected(newLines);
-    // setIsMouseDown(true);
-    // } else {
-    const newLines = lines.filter(line => !selected.some(existingLine => isIdentical(line, existingLine)))
-    setSelected([...selected, ...newLines])
-    setIsMouseDown(2);
-    // }
-  };
 
   const resetSelected = () => {
     setSelected([])
@@ -103,7 +91,7 @@ export default function Home() {
   }
 
   const renderSelectedLines = useCallback((selected: Line[]): JSX.Element[] => {
-    const pairs: {[k: number]: boolean} = {}
+    const pairs: Record<string, boolean> = {}
     const result: [Line, Line | null][] = []
     // First we look for the line pair
     outer:
@@ -147,7 +135,23 @@ export default function Home() {
     }
   };
 
-  const canvasBoxes = useMemo(() => rows.flatMap((row) => columns.map((col) => <div className={`${isMouseDown === 3 ? "pointer-events-none" : ""}`} key={`${row}_${col}`}
+  const canvasBoxes = useMemo(() => {
+    const handleMouseDown = (row: number, col: number) => {
+      const lines = generateLinesForBox(row, col)
+      // const linesAreSelected = lines.every(line => selected.some(l => isIdentical(l, line)))
+      // if (linesAreSelected) {
+      // const newLines = deleteLines(selected, lines) // Remains an open question: How to define the lines to delete?
+      // It will have to do with the requirements of valid modules: the set S of lines to delete will be such that the selected lines - S is a valid module.
+      // For now, we will disable delete mode: you can only delete individual lines.
+      // setSelected(newLines);
+      // setIsMouseDown(true);
+      // } else {
+      const newLines = lines.filter(line => !selected.some(existingLine => isIdentical(line, existingLine)))
+      setSelected([...selected, ...newLines])
+      setIsMouseDown(2);
+      // }
+    };
+  return rows.flatMap((row) => columns.map((col) => <div className={`${isMouseDown === 3 ? "pointer-events-none" : ""}`} key={`${row}_${col}`}
     style={{
       gridRowStart: row,
       gridColumnStart: col,
@@ -156,9 +160,8 @@ export default function Home() {
     }} 
     onMouseDown={() => handleMouseDown(row, col)}
     onMouseEnter={() => handleMouseEnter(row, col)}
-  >
-    <div className="w-full h-full"></div>
-  </div>)), [selected, isMouseDown, handleMouseDown, handleMouseEnter])
+  ></div>))
+  }, [isMouseDown, handleMouseEnter])
 
   useEffect(() => {
     const handleMouseUp = () => {
@@ -173,7 +176,7 @@ export default function Home() {
   }, [isMouseDown])
 
   useEffect(() => {
-    // void Swal.fire("", "<div style=\"font-size: 20px;\">Seguí las pasos indicados arriba para usar el maquetador. <br/> <br/>Si querés volver a empezar el proceso, tocá en cualquier momento el botón de <b>Reset</b>.</div>", "info")
+    void Swal.fire("", "<div style=\"font-size: 20px;\">Seguí las pasos indicados arriba para usar el maquetador. <br/> <br/>Si querés volver a empezar el proceso, tocá en cualquier momento el botón de <b>Reset</b>.</div>", "info")
   }, [])
 
   return (
