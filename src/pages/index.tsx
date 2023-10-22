@@ -3,8 +3,45 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Swal from "sweetalert2";
 import { Line, MouseDownState, deleteLine, generateInstructions, generateLinesForBox, getBoxPositionForLine, isBoxMate, isIdentical, lineIsVertical } from "~/utils/modulesLogic";
 
+class TupleSet {
+  private map: Map<string, {position: [number, number], lines: Line[]}> = new Map();
+
+  add(tuple: [number, number], lines: Line[]) {
+    const key = tuple.join(',');
+    const existingLines = this.map.get(key)?.lines
+    this.map.set(key, {position: tuple, lines: existingLines ? [...existingLines, ...lines] : lines });
+  }
+
+  has(tuple: [number, number]) {
+    const key = tuple.join(',');
+    return this.map.has(key);
+  }
+
+  delete(tuple: [number, number]) {
+    const key = tuple.join(',');
+    this.map.delete(key);
+  }
+
+  difference(otherSet: TupleSet): TupleSet {
+    const diffSet = new TupleSet();
+    this.map.forEach((value, key) => {
+      if (!otherSet.has(value.position)) {
+        diffSet.add(value.position, value.lines);
+      }
+    });
+    return diffSet;
+  }
+
+  toArray(): {position: [number, number], lines: Line[]}[] {
+    return Array.from(this.map.values());
+  }
+}
+
 const rows = [2,3,4,5,6,7]
 const columns = [2,3,4,5,6,7]
+const canvasBoxes = rows.flatMap(row => columns.map(col => [col, row] as [number, number]))
+const canvasBoxesSet = new TupleSet()
+canvasBoxes.forEach(box => canvasBoxesSet.add(box, []))
 
 export default function Home() {
   const [selected, setSelected] = useState<Line[]>([])
@@ -36,12 +73,12 @@ export default function Home() {
     return <div onClick={() => setSelected(deleteLine(selected, line))} className={`bg-primary hover:bg-secondary ${isMouseDown === 2 ? "pointer-events-none" : ""}`} key={`${a}_${b}_${c}_${d}`} style={style}></div>
   }
 
+
   const handleDoors = (row: number, col: number) => {
     if (isMouseDown === 3) return setDoors({...doors, [`${col}_${row}`]: true})
   }
 
   const handleMouseEnter = (row: number, col: number) => {
-    console.log(col, row)
     if (isMouseDown === 2) {
       const lines = generateLinesForBox(row, col)
       const newLines = lines.filter(line => !selected.some(existingLine => isIdentical(line, existingLine)))
@@ -57,19 +94,47 @@ export default function Home() {
       setSelected([...selected, ...newLines])
       setIsMouseDown(2);
     };
-    return rows.flatMap((row) => columns.map((col) => <div className={`${doors[`${col}_${row}`] ? "bg-accent" : ""}`} key={`${row}_${col}`}
+    const selectedBoxes = new TupleSet()
+    selected.forEach((line) => selectedBoxes.add(getBoxPositionForLine(line), [line]))
+
+    const diffSet = canvasBoxesSet.difference(selectedBoxes)
+
+    const selectedBoxesElements = selectedBoxes.toArray().map(box => {
+      const boxIsOutOfCanvas = box.position[0] < columns[0]! || box.position[0] > columns[columns.length - 1]! || box.position[1] < rows[0]! || box.position[1] > rows[rows.length - 1]!
+      return <div className={`${doors[`${box.position[0]}_${box.position[1]}`] ? "bg-accent" : ""} ${boxIsOutOfCanvas ? "pointer-events-none" : ""}`} key={`${box.position[0]}_${box.position[1]}`}
       style={{
-        gridRowStart: row,
-        gridColumnStart: col,
+        gridRowStart: box.position[1],
+        gridColumnStart: box.position[0],
+        border: boxIsOutOfCanvas ? "none" : "0.5px dashed black",
+        position: "relative"
+      }} 
+      onMouseDown={() => handleMouseDown(box.position[1], box.position[0])}
+      onMouseEnter={() => handleMouseEnter(box.position[1], box.position[0])}
+      onClick={() => handleDoors(box.position[1], box.position[0])}
+    >
+        {box.lines.map(renderLine)}
+    </div>
+    })
+
+    const regularBoxesElements = diffSet.toArray().map(box => {
+      return <div className={`${doors[`${box.position[0]}_${box.position[1]}`] ? "bg-accent" : ""}`} key={`${box.position[0]}_${box.position[1]}`}
+      style={{
+        gridRowStart: box.position[1],
+        gridColumnStart: box.position[0],
         border: "0.5px dashed black",
         position: "relative"
       }} 
-      onMouseDown={() => handleMouseDown(row, col)}
-      onMouseEnter={() => handleMouseEnter(row, col)}
-      onClick={() => handleDoors(row, col)}
+      onMouseDown={() => handleMouseDown(box.position[1], box.position[0])}
+      onMouseEnter={() => handleMouseEnter(box.position[1], box.position[0])}
+      onClick={() => handleDoors(box.position[1], box.position[0])}
     >
-        {selected.filter(l => getBoxPositionForLine(l)[0] === col && getBoxPositionForLine(l)[1] === row).map(renderLine)}
-    </div>))
+    </div>})
+
+    return [
+      ...selectedBoxesElements,
+      ...regularBoxesElements
+    ]
+
   }, [isMouseDown, handleMouseEnter, doors, selected])
 
   useEffect(() => {
