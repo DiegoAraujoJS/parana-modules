@@ -16,8 +16,6 @@ export default function Home() {
   const [doors, setDoors] = useState<Record<string, boolean>>({})
   const [isMouseDown, setIsMouseDown] = useState<MouseDownState>(1);
 
-  const renderTimes = useRef(0)
-
   const resetSelected = useCallback(() => {
     setSelected([])
     setDoors({})
@@ -65,7 +63,7 @@ export default function Home() {
       history.current.push(line)
       return setSelected(deleteLine(selected, line))
     }} className={`bg-primary hover:bg-secondary ${isMouseDown === 2 ? "pointer-events-none" : ""}`} key={line.join('_')} style={style}></div>
-  }, [isMouseDown, setSelected, deleteLine, selected])
+  }, [isMouseDown, setSelected, selected])
 
   const renderBox = useCallback((box: Box) => {
     const boxIsOutOfCanvas = box.position[0] < columns[0]! || box.position[0] > columns[columns.length - 1]! || box.position[1] < rows[0]! || box.position[1] > rows[rows.length - 1]!
@@ -82,7 +80,7 @@ export default function Home() {
     >
       {box.lines.map(renderLine)}
     </div>
-  }, [renderLine, handleMouseDown, handleMouseEnter, handleDoors])
+  }, [renderLine, handleMouseDown, handleMouseEnter, handleDoors, doors])
 
   const canvasBoxes = useMemo(() => {
     const selectedBoxes = new TupleSet()
@@ -109,11 +107,6 @@ export default function Home() {
   useEffect(() => {
     void Swal.fire("", "<div style=\"font-size: 20px;\">Seguí las pasos indicados arriba para usar el maquetador. <br/> <br/>Si querés volver a empezar el proceso, tocá en cualquier momento el botón de <b>Reset</b>.</div>", "info")
   }, [])
-
-  useEffect(() => {
-    renderTimes.current++
-    console.log(renderTimes.current)
-  })
 
   return (
     <>

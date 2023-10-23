@@ -22,7 +22,7 @@ export function lineIsVertical (line: Line) {
 } 
 
 export function generateInstructions(mouseDownState: MouseDownState): string[] {
-  let result: string[] = []
+  const result: string[] = []
   if (mouseDownState < 3) result.push("1. Presioná y pasá el cursor por las cajas")
   if (mouseDownState === 3) result.push("2. Tocá las columnas para generar espacios.", "Tocá las cajas para generar puertas")
   return result
@@ -37,7 +37,7 @@ export function getBoxPositionForLine(line: Line): [number, number] {
 }
 
 export class TupleSet {
-  private map: Map<string, Box> = new Map();
+  private map: Map<string, Box> = new Map<string, Box>();
 
   add(tuple: [number, number], lines: Line[]) {
     const key = tuple.join(',');
@@ -57,7 +57,7 @@ export class TupleSet {
 
   difference(otherSet: TupleSet): TupleSet {
     const diffSet = new TupleSet();
-    this.map.forEach((value, key) => {
+    this.map.forEach((value) => {
       if (!otherSet.has(value.position)) {
         diffSet.add(value.position, value.lines);
       }
