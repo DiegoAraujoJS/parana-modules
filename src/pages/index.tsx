@@ -94,7 +94,7 @@ export default function Home() {
 
   useEffect(() => {
     const handleMouseUp = () => {
-      if (isMouseDown === 2) setIsMouseDown(3)
+      if (isMouseDown === 2) return setTimeout(() => setIsMouseDown(3), 1)
     }
     window.addEventListener('mouseup', handleMouseUp)
 
