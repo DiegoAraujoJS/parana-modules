@@ -2,35 +2,20 @@ export type Line = [number, number, number, number]
 export type Box = {position: [number, number], lines: Line[]}
 export type MouseDownState = 1 | 2 | 3
 
-export function generateLinesForBox(row: number, col: number): Line[] {
-  return [
-    // [(a, b), (c, d)]
-    // lines [(a, b), (c, d)] are always described following the following rule: for vertical lines, we always have b + 1 = d. For horizontal lines, we always have a + 1 = c.
-    // This restriction helps us to compute the function isBoxMate for two mate lines.
+export function generateLinesForBoxDifference(row: number, col: number, base: Line[]) {
+  const lines = [
     [col - 1, row - 1, col - 1, row], // left
     [col - 1, row - 1, col, row - 1], // top
     [col - 1, row, col, row], // bottom
     [col, row - 1, col, row] // right
-  ]
+  ] as Line[]
+
+  return lines.filter(line => !base.some(existingLine => isIdentical(line, existingLine)))
 }
 
-export function isIdentical(line1: Line, line2: Line){
+function isIdentical(line1: Line, line2: Line){
   return (line1[0] === line2[0] && line1[1] === line2[1] && line1[2] === line2[2] && line1[3] === line2[3])
 }
-
-export function isBoxMate(pairLineA: Line, pairLineB: Line, swaped = false): boolean {
-  if (isIdentical(pairLineA, pairLineB)) return false
-
-  /* eslint-disable @typescript-eslint/no-unused-vars */
-  const [a1, b1, c1, d1] = pairLineA
-  const [a2, b2, c2, d2] = pairLineB
-  /* eslint-enable @typescript-eslint/no-unused-vars */
-  return (a1 === a2 && b1 === b2) /* Therefore  */
-    && (b1 + 1 === d1) /* Then */
-    && (a2 + 1 === c2) 
-    || (!swaped && isBoxMate(pairLineB, pairLineA, true))
-}
-
 
 export function lineIsVertical (line: Line) {
   return line[0] === line[2]
