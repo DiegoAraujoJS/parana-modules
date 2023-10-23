@@ -68,7 +68,7 @@ export default function Home() {
     const boxIsOutOfCanvas = box.position[0] < columns[0]! || box.position[0] > columns[columns.length - 1]! || box.position[1] < rows[0]! || box.position[1] > rows[rows.length - 1]!
     const showLeftBorder = !boxIsOutOfCanvas && (box.lines.length === 0 || !box.lines.some(lineIsVertical))
     const showTopBorder = !boxIsOutOfCanvas && (box.lines.length === 0 || box.lines.every(lineIsVertical))
-    let borderClassName = isMouseDown !== 3 ? `${showLeftBorder ? "border-l" : ""} ${showTopBorder ? "border-t" : ""} border-dashed border-primary` : ""
+    const borderClassName = isMouseDown !== 3 ? `${showLeftBorder ? "border-l" : ""} ${showTopBorder ? "border-t" : ""} border-dashed border-primary` : ""
     return <div className={`${doors[`${box.position[0]}_${box.position[1]}`] ? "bg-accent" : ""} relative ${borderClassName}`} key={box.position.join('_')}
       style={{
         gridColumnStart: box.position[0],
