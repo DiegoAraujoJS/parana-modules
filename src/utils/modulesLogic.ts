@@ -1,4 +1,5 @@
 export type Line = [number, number, number, number]
+export type Box = {position: [number, number], lines: Line[]}
 export type MouseDownState = 1 | 2 | 3
 
 export function generateLinesForBox(row: number, col: number): Line[] {
@@ -48,4 +49,38 @@ export function deleteLine(lines: Line[], lineToDelete: Line) {
 
 export function getBoxPositionForLine(line: Line): [number, number] {
   return [line[0] + 1, line[1] + 1]
+}
+
+export class TupleSet {
+  private map: Map<string, Box> = new Map();
+
+  add(tuple: [number, number], lines: Line[]) {
+    const key = tuple.join(',');
+    const existingLines = this.map.get(key)?.lines
+    this.map.set(key, {position: tuple, lines: existingLines ? [...existingLines, ...lines] : lines });
+  }
+
+  has(tuple: [number, number]) {
+    const key = tuple.join(',');
+    return this.map.has(key);
+  }
+
+  delete(tuple: [number, number]) {
+    const key = tuple.join(',');
+    this.map.delete(key);
+  }
+
+  difference(otherSet: TupleSet): TupleSet {
+    const diffSet = new TupleSet();
+    this.map.forEach((value, key) => {
+      if (!otherSet.has(value.position)) {
+        diffSet.add(value.position, value.lines);
+      }
+    });
+    return diffSet;
+  }
+
+  toArray(): Box[] {
+    return Array.from(this.map.values());
+  }
 }
