@@ -6,9 +6,8 @@ import { TupleSet, deleteLine, generateInstructions, generateLinesForBoxDifferen
 
 const rows = [2,3,4,5,6,7]
 const columns = [2,3,4,5,6,7]
-const canvasBoxes = rows.flatMap(row => columns.map(col => [col, row] as [number, number]))
 const canvasBoxesSet = new TupleSet()
-canvasBoxes.forEach(box => canvasBoxesSet.add(box, []))
+rows.flatMap(row => columns.map(col => [col, row] as Box['position'])).forEach(box => canvasBoxesSet.add(box, []))
 
 export default function Home() {
   const [selected, setSelected] = useState<Line[]>([])

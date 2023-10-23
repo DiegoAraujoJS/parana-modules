@@ -2,6 +2,10 @@ export type Line = [number, number, number, number]
 export type Box = {position: [number, number], lines: Line[]}
 export type MouseDownState = 1 | 2 | 3
 
+function isIdentical(line1: Line, line2: Line){
+  return (line1[0] === line2[0] && line1[1] === line2[1] && line1[2] === line2[2] && line1[3] === line2[3])
+}
+
 export function generateLinesForBoxDifference(row: number, col: number, base: Line[]) {
   const lines = [
     [col - 1, row - 1, col - 1, row], // left
@@ -11,10 +15,6 @@ export function generateLinesForBoxDifference(row: number, col: number, base: Li
   ] as Line[]
 
   return lines.filter(line => !base.some(existingLine => isIdentical(line, existingLine)))
-}
-
-function isIdentical(line1: Line, line2: Line){
-  return (line1[0] === line2[0] && line1[1] === line2[1] && line1[2] === line2[2] && line1[3] === line2[3])
 }
 
 export function lineIsVertical (line: Line) {
@@ -32,32 +32,32 @@ export function deleteLine(lines: Line[], lineToDelete: Line) {
   return lines.filter(line => !isIdentical(line, lineToDelete))
 }
 
-export function getBoxPositionForLine(line: Line): [number, number] {
+export function getBoxPositionForLine(line: Line): Box['position'] {
   return [line[0] + 1, line[1] + 1]
 }
 
 export class TupleSet {
-  private map: Map<string, Box> = new Map<string, Box>();
+  private record: Map<string, Box> = new Map<string, Box>();
 
-  add(tuple: [number, number], lines: Line[]) {
+  add(tuple: Box['position'], lines: Line[]) {
     const key = tuple.join(',');
-    const existingLines = this.map.get(key)?.lines
-    this.map.set(key, {position: tuple, lines: existingLines ? [...existingLines, ...lines] : lines });
+    const existingLines = this.record.get(key)?.lines
+    this.record.set(key, {position: tuple, lines: existingLines ? [...existingLines, ...lines] : lines });
   }
 
-  has(tuple: [number, number]) {
+  has(tuple: Box['position']) {
     const key = tuple.join(',');
-    return this.map.has(key);
+    return this.record.has(key);
   }
 
-  delete(tuple: [number, number]) {
+  delete(tuple: Box['position']) {
     const key = tuple.join(',');
-    this.map.delete(key);
+    this.record.delete(key);
   }
 
   difference(otherSet: TupleSet): TupleSet {
     const diffSet = new TupleSet();
-    this.map.forEach((value) => {
+    this.record.forEach((value) => {
       if (!otherSet.has(value.position)) {
         diffSet.add(value.position, value.lines);
       }
@@ -66,6 +66,6 @@ export class TupleSet {
   }
 
   toArray(): Box[] {
-    return Array.from(this.map.values());
+    return Array.from(this.record.values());
   }
 }
