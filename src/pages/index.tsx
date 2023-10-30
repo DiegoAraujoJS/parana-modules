@@ -82,13 +82,10 @@ export default function Home() {
   }, [renderLine, handleMouseDown, handleMouseEnter, handleDoors, doors])
 
   const canvasBoxes = useMemo(() => {
-    const selectedBoxes = new TupleSet()
+    const selectedBoxes = new TupleSet().union(canvasBoxesSet)
     selected.forEach((line) => selectedBoxes.add(getBoxPositionForLine(line), [line]))
 
-    return [
-      ...selectedBoxes.toArray().map(renderBox),
-      ...canvasBoxesSet.difference(selectedBoxes).toArray().map(renderBox)
-    ]
+    return selectedBoxes.toArray().map(renderBox)
 
   }, [selected, renderBox])
 

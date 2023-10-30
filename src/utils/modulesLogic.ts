@@ -55,14 +55,15 @@ export class TupleSet {
     this.record.delete(key);
   }
 
-  difference(otherSet: TupleSet): TupleSet {
-    const diffSet = new TupleSet();
+  union(otherSet: TupleSet): TupleSet {
+    const unionSet = new TupleSet();
     this.record.forEach((value) => {
-      if (!otherSet.has(value.position)) {
-        diffSet.add(value.position, value.lines);
-      }
+      unionSet.add(value.position, value.lines);
     });
-    return diffSet;
+    otherSet.record.forEach((value) => {
+      unionSet.add(value.position, value.lines);
+    })
+    return unionSet;
   }
 
   toArray(): Box[] {
